@@ -5,7 +5,7 @@ from random import randint
 
 # TODO: how to read in a text file in python
 # Have it output features and labels in correct numpy format
-def read_features_labels(filepath:str = None) -> tuple:
+def read_features_labels(filepath:str=None) -> tuple:
 
     with open(filepath) as f:
         lines = f.readlines()
@@ -48,11 +48,20 @@ class Node:
 
         self.best_feature = None
 
+    @staticmethod
+    def get_entropy(Y:np.array=None) -> np.float16:
+
+        pc = np.sum(Y) / len(Y)
+        neg_pc = 1.0 - pc
+
+        
+
+
 
 if __name__ == "__main__":
 
     X, Y = read_features_labels('data_1.txt')
 
-    
+    print(Node.get_entropy(Y))
     print(X)
     print(Y)
