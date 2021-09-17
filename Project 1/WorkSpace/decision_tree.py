@@ -1,5 +1,5 @@
 import numpy as np
-import math
+from math import log
 from scipy import spatial
 from random import randint
 
@@ -30,7 +30,7 @@ def read_features_labels(filepath:str=None) -> tuple:
 class Node:
     def __init__(
         self,
-        Y: list, 
+        Y: np.array, 
         X: np.ndarray, 
         max_depth=None,
         depth=None,
@@ -42,6 +42,7 @@ class Node:
         self.depth = depth if depth else 0
 
         # TODO: Entropy at the node level
+        self.entropy = Node.get_entropy(self.Y)
 
         self.left = None
         self.right = None
@@ -52,16 +53,36 @@ class Node:
     def get_entropy(Y:np.array=None) -> np.float16:
 
         pc = np.sum(Y) / len(Y)
-        neg_pc = 1.0 - pc
+        pc_other = 1.0 - pc
 
-        
+        return -pc * log(pc, 2) - pc_other * log(pc_other, 2)
 
+    @staticmethod
+    def get_IG():
+        pass
+
+    @staticmethod
+    def get_partitions(X: np.ndarray, Y:np.array) -> tuple:
+        '''
+        See which rows correspond with true and false
+        and split them
+        '''
+        true_rows = np.empty((0, 4), bool)
+        false_rows = np.empty((0, 4), bool)
+        for rows,labels in zip(X,Y):
+            if labels == True:
+                true_rows = np.vstack((true_rows, rows))
+            else:
+                false_rows = np.vstack((false_rows, rows))
+        return (true_rows, false_rows)
 
 
 if __name__ == "__main__":
 
     X, Y = read_features_labels('data_1.txt')
-
+    t, f = Node.get_partitions(X,Y)
+    print(t)
+    print(f)
     print(Node.get_entropy(Y))
     print(X)
     print(Y)
