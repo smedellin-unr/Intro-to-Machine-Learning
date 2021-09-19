@@ -35,10 +35,13 @@ class Node:
         max_depth=None,
         depth=None,
     ) :
-        self.Y = Y
-        self.X = X
+        self.Y = Y # 1D array
+        self.X = X # 2D array
 
-        self.max_depth = max_depth if max_depth else 3
+        self.n_samples = self.X.shape[0]
+        self.n_features = self.X.shape[1]
+
+        self.max_depth = max_depth if max_depth else self.n_features # TODO: make sure this is legit
         self.depth = depth if depth else 0
 
         # TODO: Entropy at the node level
@@ -91,19 +94,16 @@ class Node:
 
     def best_split(self) -> tuple:
         '''
-        Determine which feature yields
+        Determine the feature yields
         the most information gain
         '''
         #true_rows, false_rows = Node.get_partitions(self.X, self.Y)
         xy_matrix = np.column_stack((self.X,self.Y))
-        n_samples = xy_matrix.shape[0]
-        n_features = xy_matrix.shape[1] - 1
         best_feature = None
         best_value = None
         best_information_gain = 0.0
 
-        for column in range(n_features):
-
+        for column in range(self.n_features):
             left_entropy = right_entropy = left_feature_size = right_feature_size = total_size = 0
             # calculate entropy for left branch
             temp_label = xy_matrix[xy_matrix[:,column] == False][:, -1]
@@ -131,8 +131,6 @@ class Node:
                 best_feature, best_information_gain = column, information_gain
                 
         return (best_feature, best_information_gain)
-        
-
         
 
 if __name__ == "__main__":
