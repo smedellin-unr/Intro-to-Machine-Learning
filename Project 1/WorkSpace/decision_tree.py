@@ -28,20 +28,6 @@ def read_features_labels(filepath:str=None) -> tuple:
 
     return (X,Y)
 
-class Leaf:
-    def __init__(
-        self,
-        decision:bool,
-        side: bool,
-    ):
-        self.decision = decision
-        self.side = side
-
-    def __str__(self):
-        if self.side:
-            return 'Right Leaf: Yes' if self.decision else 'Right Leaf: No'
-        else:
-            return 'Left Leaf: Yes' if self.decision else 'Left Leaf: No'
 
 class Node:
     def __init__(
@@ -211,7 +197,7 @@ class Node:
 
         best_feature, best_information_gain, leaf_side, leaf_decision = self.best_split()
 
-        if (best_feature is not None) and (best_information_gain != 0):
+        if (best_feature is not None) and (best_information_gain != 0) and (self.depth < self.max_depth):
             self.best_feature = best_feature
             self.best_information_gain = best_information_gain
             print("best feature:", best_feature)
