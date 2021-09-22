@@ -168,13 +168,14 @@ class Node:
             # calculate Information Gain for split
             total_size = left_feature_size + right_feature_size
             information_gain = self.entropy - ((left_feature_size / total_size) * left_entropy + (right_feature_size / total_size) * right_entropy)
+            
             '''
-            print("feature {} and IG {}".format(column + 1, information_gain))
+            #print("feature {} and IG {}".format(column + 1, information_gain))
             print("Left Entropy: ", left_entropy)
             print("left proportion: ", left_feature_size / total_size)
             print("Right Entropy: ", right_entropy)
             print("right proportion: ", right_feature_size / total_size)
-            print("Information gain: ",information_gain)
+            #print("Information gain: ",information_gain)
             '''
 
             if information_gain >= best_information_gain:
@@ -183,14 +184,20 @@ class Node:
                 best_right_entropy = right_entropy
                 best_left_leaf_estimate = left_leaf_estimate
                 best_left_entropy = left_entropy
-                
+        '''    
+        print(f'best feature {best_feature} best_information_gain {best_information_gain}')
+        print(f'best_right_leaf_estimate {best_right_leaf_estimate} best_right_entropy {best_right_entropy}')
+        print(f'best_left_leaf_estimate {best_left_leaf_estimate} best_left_entropy {best_left_entropy}')
+        '''        
         if best_right_entropy >= best_left_entropy:
-            leaf_side = True
-            leaf_decision = best_right_leaf_estimate
-        else:
-            leaf_side = False                   # TODO: make this prettier
+            leaf_side = False
             leaf_decision = best_left_leaf_estimate
-
+        else:
+            leaf_side = True                   # TODO: make this prettier
+            leaf_decision = best_right_leaf_estimate
+        '''
+        print(f'leaf_side {leaf_side} leaf_decision {leaf_decision}')
+        '''
         return (best_feature, best_information_gain, leaf_side, leaf_decision)
 
     def leaf_assignment(self,leaf_side: bool, leaf_assignment: bool):
@@ -210,7 +217,7 @@ class Node:
             print("best feature:", best_feature)
 
             # if leaf is on the right decision branch...
-            if not leaf_side:
+            if leaf_side:
 
                 # make the left decision branch a node
                 left_side_dataset = np.copy(self.xy_matrix[self.xy_matrix[:,best_feature] == False])
@@ -221,9 +228,17 @@ class Node:
                     max_depth=self.max_depth,
                     node_type='left_node'
                 )
-                
+                right = Node(
+                    node_type='leaf',
+                    leaf_decision=leaf_decision,
+                    leaf_side=leaf_side,
+                )
+                self.right = right
                 self.left = left
+                print('-> left')
                 print(self.left.node_type)
+                print('-->right')
+                print(self.right.node_type)
 
                 self.left.grow_tree()
                 
@@ -237,25 +252,18 @@ class Node:
                     max_depth=self.max_depth,
                     node_type='right_node'
                 )
-
+                left = Node(
+                    node_type='leaf',
+                    leaf_decision=leaf_decision,
+                    leaf_side=leaf_side
+                )
+                self.left = left
                 self.right = right
+                print('->left')
+                print(self.left.node_type)
+                print('-->right')
                 print(self.right.node_type)
                 self.right.grow_tree()
-        
-        if self.right is None : 
-            self.right = Node(
-                node_type='leaf', 
-                leaf_decision=leaf_decision, 
-                leaf_side=leaf_side
-            )
-
-        if self.left is None : 
-            self.left = Node(
-                node_type='leaf', 
-                leaf_decision=leaf_decision, 
-                leaf_side=leaf_side
-            )
-
         
 def print_tree(node: Node):
     if (node.leaf_decision is not None) and (node.leaf_side is not None):
@@ -274,7 +282,8 @@ if __name__ == "__main__":
 
     X, Y = read_features_labels('data_set_TV.txt')
     n_=Node(X=X, Y=Y)
-    print_tree(n_)
+    n_.grow_tree()
+    #print_tree(n_)
     '''
     best_feature = best_information_gain = 0
     print('root node')
