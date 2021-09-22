@@ -250,17 +250,36 @@ class Node:
                 print('-->right')
                 print(self.right.node_type)
                 self.right.grow_tree()
+
+    
+    def print_format(self):
         
-def print_tree(node: Node):
-    if (node.leaf_decision is not None) and (node.leaf_side is not None):
-        response = 'Yes' if node.leaf_decision else 'No'
-        side = 'Right' if node.leaf_side else 'Left'
-        print('{} Leaf: {}'.format(side, response))
-        return
-    if 'node' in node.node_type:
-        print(node.node_type)
-        print_tree(node.left)
-        print_tree(node.right)
+        if 'node' in self.node_type:
+            print(self.node_type)
+        else:
+            leaf_side = 'right' if self.leaf_side else 'left'
+            leaf_decision = 'yes' if self.leaf_decision else 'no'
+            print(f'{leaf_side} leaf -> {leaf_decision}')
+
+    def print_tree(self):
+        '''
+        if (self.leaf_decision is not None) and (self.leaf_side is not None):
+            response = 'Yes' if self.leaf_decision else 'No'
+            side = 'Right' if self.leaf_side else 'Left'
+            print('{} Leaf: {}'.format(side, response))
+            return
+        if 'node' in self.node_type:
+            print(self.node_type)
+            print_tree(self.left)
+            print_tree(self.right)
+        '''
+        self.print_format()
+
+        if self.left is not None:
+            self.left.print_tree()
+        
+        if self.right is not None:
+            self.right.print_tree()
     
 
 
@@ -269,6 +288,7 @@ if __name__ == "__main__":
     X, Y = read_features_labels('data_set_TV.txt')
     n_=Node(X=X, Y=Y)
     n_.grow_tree()
+    n_.print_tree()
     #print_tree(n_)
     '''
     best_feature = best_information_gain = 0
