@@ -3,6 +3,7 @@ from math import log
 from scipy import spatial
 from random import randint
 from enum import Enum
+from abc import ABCMeta, abstractmethod
 
 # TODO: how to read in a text file in python
 # Have it output features and labels in correct numpy format
@@ -45,24 +46,23 @@ class Leaf:
 class Node:
     def __init__(
         self,
-        X: np.ndarray, 
-        Y: np.array, 
+        X: np.ndarray=None, 
+        Y: np.array=None, 
         max_depth: int=None,
         depth: int=None,
         node_type: str=None,
-        leaf_side: bool=None,
-        leaf_decision: bool=None,
+        leaf_decision: bool = None,
+        leaf_side: bool = None,
     ) :
-        self.Y = Y # 1D array
-        self.X = X # 2D array
+        self.Y = Y if Y is not None else np.zeros(shape=(2,4))# 1D array
+        self.X = X if X is not None else np.zeros(shape=(2,4))# 2D array
 
         self.n_samples = self.X.shape[0]
         self.n_features = self.X.shape[1]
 
         self.xy_matrix = np.column_stack((X,Y)) # features and labels concatenated into one 2D matrix
 
-        self.node_type = node_type if node_type else 'root'
-
+        self.node_type = node_type if node_type else 'root_node'
         self.max_depth = max_depth if max_depth else self.n_features
         self.depth = depth if depth else 0
 
@@ -76,7 +76,8 @@ class Node:
         self.best_feature = 0
         self.best_information_gain = 0.0
 
-        ## execute function that decides
+        self.leaf_side = leaf_side if leaf_side else None
+        self.leaf_decision = leaf_decision if leaf_decision else None
 
     @staticmethod
     def get_entropy(Y:np.array) -> np.float16:
@@ -210,8 +211,6 @@ class Node:
 
             # if leaf is on the right decision branch...
             if not leaf_side:
-                # make the right decision branch a leaf
-                self.right = Leaf(leaf_decision, leaf_side)
 
                 # make the left decision branch a node
                 left_side_dataset = np.copy(self.xy_matrix[self.xy_matrix[:,best_feature] == False])
@@ -224,15 +223,12 @@ class Node:
                 )
                 
                 self.left = left
-
-                print(self.right)
                 print(self.left.node_type)
 
                 self.left.grow_tree()
                 
             # if leaf is on the left decision branch
             else:
-                self.left = Leaf(leaf_decision, leaf_side)
                 right_side_dataset = np.copy(self.xy_matrix[self.xy_matrix[:,best_feature] == True])
                 right = Node(
                     X=right_side_dataset[:,:-1],
@@ -243,19 +239,49 @@ class Node:
                 )
 
                 self.right = right
-                print(self.left)
                 print(self.right.node_type)
                 self.right.grow_tree()
         
+        if self.right is None : 
+            self.right = Node(
+                node_type='leaf', 
+                leaf_decision=leaf_decision, 
+                leaf_side=leaf_side
+            )
+
+        if self.left is None : 
+            self.left = Node(
+                node_type='leaf', 
+                leaf_decision=leaf_decision, 
+                leaf_side=leaf_side
+            )
+
+        
+def print_tree(node: Node):
+    if (node.leaf_decision is not None) and (node.leaf_side is not None):
+        response = 'Yes' if node.leaf_decision else 'No'
+        side = 'Right' if node.leaf_side else 'Left'
+        print('{} Leaf: {}'.format(side, response))
+        return
+    if 'node' in node.node_type:
+        print(node.node_type)
+        print_tree(node.left)
+        print_tree(node.right)
+    
+
 
 if __name__ == "__main__":
 
     X, Y = read_features_labels('data_set_TV.txt')
     n_=Node(X=X, Y=Y)
+    print_tree(n_)
+    '''
     best_feature = best_information_gain = 0
     print('root node')
     n_.grow_tree()
+    print_tree(n_)
     #print(best_feature, best_information_gain)
     #print(n_.best_feature, n_.best_information_gain)
     #print(best_feature, best_information_gain)
     t, f = Node.get_partitions(X,Y)
+    '''
