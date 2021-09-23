@@ -266,18 +266,28 @@ class Node:
                     self.right.grow_tree()
 
             else:
-                left = Node(
-                    node_type='leaf',
-                    leaf_decision=leaf_decision,
-                    leaf_side=leaf_side
-                )
-                right = Node(
-                    node_type='leaf',
-                    leaf_decision=leaf_decision,
-                    leaf_side=leaf_side,
-                )
-                self.left = left
-                self.right = right
+                if leaf_side:
+                    left = Node(
+                        node_type='leaf',
+                        leaf_decision=not leaf_decision,
+                    )
+                    right = Node(
+                        node_type='leaf',
+                        leaf_decision=leaf_decision,
+                    )
+                    self.left = left
+                    self.right = right
+                else:
+                    left = Node(
+                        node_type='leaf',
+                        leaf_decision=leaf_decision,
+                    )
+                    right = Node(
+                        node_type='leaf',
+                        leaf_decision=not leaf_decision,
+                    )
+                    self.left = left
+                    self.right = right
                 print('->left')
                 print(self.left.node_type)
                 if 'leaf' in self.left.node_type: print(f'Decision: {self.left.leaf_decision}') 
