@@ -120,6 +120,8 @@ class Node:
         # used for assessing where split will occur
         best_right_entropy = 0.0
         best_left_entropy = 0.0
+        # terminal node detection
+        terminal_node = False
 
         print(self.xy_matrix)
         print('\n')
@@ -179,12 +181,15 @@ class Node:
             leaf_side = False
             leaf_decision = best_left_leaf_estimate
         else:
-            leaf_side = True                   # TODO: make this prettier
+            leaf_side = True
             leaf_decision = best_right_leaf_estimate
+
+        if best_right_entropy == 0.0 and best_left_entropy == 0.0:
+            terminal_node = True
         '''
         print(f'leaf_side {leaf_side} leaf_decision {leaf_decision}')
         '''
-        return (best_feature, best_information_gain, leaf_side, leaf_decision)
+        return (best_feature, best_information_gain, leaf_side, leaf_decision, terminal_node)
 
     def leaf_assignment(self,leaf_side: bool, leaf_assignment: bool):
         pass
@@ -195,7 +200,7 @@ class Node:
         to build decision tree
         '''
 
-        best_feature, best_information_gain, leaf_side, leaf_decision = self.best_split()
+        best_feature, best_information_gain, leaf_side, leaf_decision, terminal_node = self.best_split()
 
         if (best_feature is not None) and (best_information_gain != 0) and (self.depth < self.max_depth):
             self.best_feature = best_feature
