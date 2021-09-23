@@ -62,8 +62,8 @@ class Node:
         self.best_feature = 0
         self.best_information_gain = 0.0
 
-        self.leaf_side = leaf_side if leaf_side else None
-        self.leaf_decision = leaf_decision if leaf_decision else None
+        self.leaf_side = leaf_side
+        self.leaf_decision = leaf_decision
 
     @staticmethod
     def get_entropy(Y:np.array) -> np.float16:
@@ -176,7 +176,7 @@ class Node:
         print(f'best feature {best_feature} best_information_gain {best_information_gain}')
         print(f'best_right_leaf_estimate {best_right_leaf_estimate} best_right_entropy {best_right_entropy}')
         print(f'best_left_leaf_estimate {best_left_leaf_estimate} best_left_entropy {best_left_entropy}')
-        '''        
+        '''       
         if best_right_entropy >= best_left_entropy:
             leaf_side = False
             leaf_decision = best_left_leaf_estimate
@@ -201,60 +201,89 @@ class Node:
         '''
 
         best_feature, best_information_gain, leaf_side, leaf_decision, terminal_node = self.best_split()
+        print("leaf decision!!!!!", leaf_decision)
 
         if (best_feature is not None) and (best_information_gain != 0) and (self.depth < self.max_depth):
             self.best_feature = best_feature
             self.best_information_gain = best_information_gain
+            #self.leaf_side = leaf_side
+            #self.leaf_decision = leaf_decision
             print("best feature:", best_feature)
+            if not terminal_node:
+                # if leaf is on the right decision branch...
+                if leaf_side:
+                    # make the left decision branch a node
+                    left_side_dataset = np.copy(self.xy_matrix[self.xy_matrix[:,best_feature] == False])
+                    left = Node(
+                        X=left_side_dataset[:,:-1],
+                        Y=left_side_dataset[:,-1],
+                        depth=self.depth+1,
+                        max_depth=self.max_depth,
+                        node_type='left_node'
+                    )
+                    print('LEAF DECISION: ',leaf_decision)
+                    right = Node(
+                        node_type='leaf',
+                        leaf_decision=leaf_decision,
+                        leaf_side=leaf_side,
+                    )
+                    print(right.leaf_decision)
+                    self.left = left
+                    self.right = right
+                    print('-> left')
+                    print(self.left.node_type)
+                    if 'leaf' in self.left.node_type: print(f'Decision: {self.left.leaf_decision}') 
+                    print('-->right')
+                    print(self.right.node_type)
+                    if 'leaf' in self.right.node_type: print(f'Decision: {self.right.leaf_decision}') 
 
-            # if leaf is on the right decision branch...
-            if leaf_side:
+                    self.left.grow_tree()
+                    
+                # if leaf is on the left decision branch
+                else:
+                    right_side_dataset = np.copy(self.xy_matrix[self.xy_matrix[:,best_feature] == True])
+                    right = Node(
+                        X=right_side_dataset[:,:-1],
+                        Y=right_side_dataset[:,-1],
+                        depth=self.depth+1,
+                        max_depth=self.max_depth,
+                        node_type='right_node'
+                    )
+                    #print(f'This is what it is for left leaf: {leaf_decision}')
+                    left = Node(
+                        node_type='leaf',
+                        leaf_decision=leaf_decision,
+                        leaf_side=leaf_side
+                    )
+                    self.left = left
+                    self.right = right
+                    print('->left')
+                    print(self.left.node_type)
+                    if 'leaf' in self.left.node_type: print(f'Decision: {self.left.leaf_decision}') 
+                    print('-->right')
+                    print(self.right.node_type)
+                    if 'leaf' in self.right.node_type: print(f'Decision: {self.right.leaf_decision}') 
+                    self.right.grow_tree()
 
-                # make the left decision branch a node
-                left_side_dataset = np.copy(self.xy_matrix[self.xy_matrix[:,best_feature] == False])
+            else:
                 left = Node(
-                    X=left_side_dataset[:,:-1],
-                    Y=left_side_dataset[:,-1],
-                    depth=self.depth+1,
-                    max_depth=self.max_depth,
-                    node_type='left_node'
+                    node_type='leaf',
+                    leaf_decision=leaf_decision,
+                    leaf_side=leaf_side
                 )
                 right = Node(
                     node_type='leaf',
                     leaf_decision=leaf_decision,
                     leaf_side=leaf_side,
                 )
-                self.right = right
-                self.left = left
-                print('-> left')
-                print(self.left.node_type)
-                print('-->right')
-                print(self.right.node_type)
-
-                self.left.grow_tree()
-                
-            # if leaf is on the left decision branch
-            else:
-                right_side_dataset = np.copy(self.xy_matrix[self.xy_matrix[:,best_feature] == True])
-                right = Node(
-                    X=right_side_dataset[:,:-1],
-                    Y=right_side_dataset[:,-1],
-                    depth=self.depth+1,
-                    max_depth=self.max_depth,
-                    node_type='right_node'
-                )
-                left = Node(
-                    node_type='leaf',
-                    leaf_decision=leaf_decision,
-                    leaf_side=leaf_side
-                )
                 self.left = left
                 self.right = right
                 print('->left')
                 print(self.left.node_type)
+                if 'leaf' in self.left.node_type: print(f'Decision: {self.left.leaf_decision}') 
                 print('-->right')
                 print(self.right.node_type)
-                self.right.grow_tree()
+                if 'leaf' in self.right.node_type: print(f'Decision: {self.right.leaf_decision}') 
 
     
     def print_format(self):
@@ -287,13 +316,42 @@ class Node:
             self.right.print_tree()
     
 
+    def predict(self, xhat: np.array) -> bool:
+        # Starting off at the root node
+        # if feature points to left branch...
+        #if 'node' in self.node_type:
+        print('first line in predict function: ',self.best_feature)
+        print('Node type: ', self.node_type)
+        print('Left node type:', self.left.node_type)
+        if 'leaf' in self.left.node_type: print(f'Decision: {self.left.leaf_decision}') 
+        print('Right node type: ', self.right.node_type)
+        if 'leaf' in self.right.node_type: print(f'Decision: {self.right.leaf_decision}') 
+        print('\n')
+        if not xhat[self.best_feature]:
+            # check if node
+            if 'node' in self.left.node_type:
+                self.left.predict(xhat)
+            else:
+                print('NANI')
+                return self.left.leaf_decision
+            # check if node
+        if xhat[self.best_feature]:
+            if 'node' in self.right.node_type:
+                self.right.predict(xhat)
+            else:
+                print('NANINANI')
+                return self.right.leaf_decision
+
+
 
 if __name__ == "__main__":
 
     X, Y = read_features_labels('data_set_TV.txt')
     n_=Node(X=X, Y=Y)
     n_.grow_tree()
-    n_.print_tree()
+    x = np.array([1,0,1,0])
+    n_.predict(x)
+    #n_.print_tree()
     #print_tree(n_)
     '''
     best_feature = best_information_gain = 0
