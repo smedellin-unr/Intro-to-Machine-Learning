@@ -330,6 +330,7 @@ class Node:
         # Starting off at the root node
         # if feature points to left branch...
         #if 'node' in self.node_type:
+        '''
         print('first line in predict function: ',self.best_feature)
         print('Node type: ', self.node_type)
         print('Left node type:', self.left.node_type)
@@ -337,21 +338,29 @@ class Node:
         print('Right node type: ', self.right.node_type)
         if 'leaf' in self.right.node_type: print(f'Decision: {self.right.leaf_decision}') 
         print('\n')
+        '''
+        _side = xhat[self.best_feature]
+
+        print(f'x hat value: {xhat[self.best_feature]}')
         if not xhat[self.best_feature]:
             # check if node
             if 'node' in self.left.node_type:
-                self.left.predict(xhat)
+                return self.left.predict(xhat)
             else:
-                print('NANI')
-                return self.left.leaf_decision
-            # check if node
-        if xhat[self.best_feature]:
-            if 'node' in self.right.node_type:
-                self.right.predict(xhat)
-            else:
-                print('NANINANI')
-                return self.right.leaf_decision
+                if self.left.leaf_decision:
+                    return True
+                return False
 
+            # check if node
+        else:
+            if 'node' in self.right.node_type:
+                return self.right.predict(xhat)
+            else:
+                if self.right.leaf_decision:
+                    return True
+                return False
+
+        #return True
 
 
 if __name__ == "__main__":
@@ -359,8 +368,8 @@ if __name__ == "__main__":
     X, Y = read_features_labels('data_set_TV.txt')
     n_=Node(X=X, Y=Y)
     n_.grow_tree()
-    x = np.array([1,0,1,0])
-    n_.predict(x)
+    x = np.array([0,0,1,1])
+    print(n_.predict(x))
     #n_.print_tree()
     #print_tree(n_)
     '''
