@@ -5,8 +5,6 @@ from random import randint
 from enum import Enum
 from abc import ABCMeta, abstractmethod
 
-# TODO: how to read in a text file in python
-# Have it output features and labels in correct numpy format
 def read_features_labels(filepath:str=None) -> tuple:
 
     with open(filepath) as f:
@@ -28,6 +26,12 @@ def read_features_labels(filepath:str=None) -> tuple:
 
     return (X,Y)
 
+def DT_train_binary(X: np.ndarray, Y: np.array, max_depth: int):
+    _n = Node(X=X, Y=Y, max_depth=max_depth)
+    return _n.grow_tree()
+
+def DT_make_prediction():
+    pass
 
 class Node:
     def __init__(
@@ -35,7 +39,7 @@ class Node:
         X: np.ndarray=None, 
         Y: np.array=None, 
         max_depth: int=None,
-        depth: int=None,
+        depth: int=0,
         node_type: str=None,
         leaf_decision: bool = None,
         leaf_side: bool = None,
@@ -49,10 +53,9 @@ class Node:
         self.xy_matrix = np.column_stack((X,Y)) # features and labels concatenated into one 2D matrix
 
         self.node_type = node_type if node_type else 'root_node'
-        self.max_depth = max_depth if max_depth else self.n_features
-        self.depth = depth if depth else 0
+        self.max_depth = self.n_features if max_depth == -1 else max_depth
+        self.depth = depth
 
-        # TODO: Entropy at the node level
         self.entropy = Node.get_entropy(self.Y)
 
         # Can be decision node of leaf
@@ -184,7 +187,7 @@ class Node:
             leaf_side = True
             leaf_decision = best_right_leaf_estimate
 
-        if best_right_entropy == 0.0 and best_left_entropy == 0.0:
+        if (best_right_entropy == 0.0 and best_left_entropy == 0.0) or (self.max_depth == self.depth):
             terminal_node = True
         '''
         print(f'leaf_side {leaf_side} leaf_decision {leaf_decision}')
@@ -201,13 +204,12 @@ class Node:
         '''
 
         best_feature, best_information_gain, leaf_side, leaf_decision, terminal_node = self.best_split()
-        print("leaf decision!!!!!", leaf_decision)
+        print(f'Best Feature {best_feature}, terminal node {terminal_node}')
+        print('current depth: ', self.depth)
 
-        if (best_feature is not None) and (best_information_gain != 0) and (self.depth < self.max_depth):
+        if (best_feature is not None) and (best_information_gain != 0): #and (self.depth < self.max_depth): ###########
             self.best_feature = best_feature
             self.best_information_gain = best_information_gain
-            #self.leaf_side = leaf_side
-            #self.leaf_decision = leaf_decision
             print("best feature:", best_feature)
             if not terminal_node:
                 # if leaf is on the right decision branch...
@@ -237,7 +239,7 @@ class Node:
                     print(self.right.node_type)
                     if 'leaf' in self.right.node_type: print(f'Decision: {self.right.leaf_decision}') 
 
-                    self.left.grow_tree()
+                    return self.left.grow_tree()
                     
                 # if leaf is on the left decision branch
                 else:
@@ -263,7 +265,7 @@ class Node:
                     print('-->right')
                     print(self.right.node_type)
                     if 'leaf' in self.right.node_type: print(f'Decision: {self.right.leaf_decision}') 
-                    self.right.grow_tree()
+                    return self.right.grow_tree()
 
             else:
                 if leaf_side:
@@ -294,6 +296,7 @@ class Node:
                 print('-->right')
                 print(self.right.node_type)
                 if 'leaf' in self.right.node_type: print(f'Decision: {self.right.leaf_decision}') 
+                return
 
     
     def print_format(self):
@@ -366,10 +369,8 @@ class Node:
 if __name__ == "__main__":
 
     X, Y = read_features_labels('data_set_TV.txt')
-    n_=Node(X=X, Y=Y)
-    n_.grow_tree()
-    x = np.array([0,0,1,1])
-    print(n_.predict(x))
+    DT = DT_train_binary(X, Y, max_depth=2)
+    #print(n_.predict(x))
     #n_.print_tree()
     #print_tree(n_)
     '''
