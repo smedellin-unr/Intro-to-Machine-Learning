@@ -1,7 +1,6 @@
 import numpy as np
 from scipy import spatial
 import matplotlib.pyplot as plt
-plt.style.use('seaborn-whitegrid')
 
 def load_data(fname):
   f = open(fname, 'r')
@@ -90,16 +89,3 @@ def KNN_test(X_train,Y_train,X_test,Y_test,K) -> float:
     compare = results == Y_test
     return (sum(compare) / len(compare))
     
-
-if __name__ == "__main__":
-    X,Y = load_data("data_4.txt")
-    
-    knn = KNN(X, Y, 5)
-    print(knn.xy_matrix)
-    xhat = np.array([3,1])
-    print(xhat)
-    print(knn.predict(xhat))
-
-    accuracy = KNN_test(X,Y,X,Y,1)
-    print(accuracy)
-

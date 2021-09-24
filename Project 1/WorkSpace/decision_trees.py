@@ -48,7 +48,6 @@ class Node:
 
         self.entropy = Node.get_entropy(self.Y)
 
-        # Can be decision node of leaf
         self.left = None 
         self.right = None
 
@@ -128,9 +127,6 @@ class Node:
             terminal_node = True
 
         return (best_feature, best_information_gain, leaf_side, leaf_decision, terminal_node)
-
-    def leaf_assignment(self,leaf_side: bool, leaf_assignment: bool):
-        pass
 
     def grow_tree(self):
         '''
@@ -262,8 +258,3 @@ def DT_test_binary(X: np.ndarray, Y: np.array, DT: Node):
             n_correct += 1
     return (n_correct / samples)
 
-if __name__ == "__main__":
-    X, Y = read_features_labels('data_set_TV.txt')
-    DT = DT_train_binary(X, Y, max_depth=-1)
-    xhat = np.array([1,0,1,0])
-    print(DT_test_binary(X,Y,DT))
