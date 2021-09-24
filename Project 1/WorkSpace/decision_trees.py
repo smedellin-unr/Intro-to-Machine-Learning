@@ -220,7 +220,6 @@ class Node:
         decision tree recursively based on binary features 
         until it hits a leaf
         '''
-        print(f'x hat value: {xhat[self.best_feature]}')
         if not xhat[self.best_feature]:
             # check if node
             if 'node' in self.left.node_type:

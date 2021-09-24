@@ -1,6 +1,5 @@
 import numpy as np
 from scipy import spatial
-import matplotlib.pyplot as plt
 
 def load_data(fname):
   f = open(fname, 'r')
@@ -71,9 +70,6 @@ class KNN:
         #print(distances)
         for i in np.arange(self.K):
             summation += distances[i][1]
-            print("Summation",summation)
-            print(distances[i])
-            print('\n\n')
         if summation > 0:
             return 1
         return -1
@@ -84,7 +80,6 @@ def KNN_test(X_train,Y_train,X_test,Y_test,K) -> float:
     samples = Y_test.shape[0]
     results = []
     for row in np.arange(samples):
-        print('row ', row + 1)
         results.append(knn.predict(X_test[row,:]))
     compare = results == Y_test
     return (sum(compare) / len(compare))
