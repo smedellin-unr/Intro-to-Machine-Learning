@@ -26,6 +26,12 @@ def read_features_labels(filepath:str=None) -> tuple:
 
     return (X,Y)
 
+def DT_train_binary(X: np.ndarray, Y: np.array, max_depth: int):
+    _n = Node(X=X, Y=Y, max_depth=max_depth)
+    return _n.grow_tree()
+
+def DT_make_prediction():
+    pass
 
 class Node:
     def __init__(
@@ -47,7 +53,7 @@ class Node:
         self.xy_matrix = np.column_stack((X,Y)) # features and labels concatenated into one 2D matrix
 
         self.node_type = node_type if node_type else 'root_node'
-        self.max_depth = max_depth if max_depth else self.n_features
+        self.max_depth = self.n_features if max_depth == -1 else max_depth
         self.depth = depth
 
         self.entropy = Node.get_entropy(self.Y)
@@ -198,15 +204,12 @@ class Node:
         '''
 
         best_feature, best_information_gain, leaf_side, leaf_decision, terminal_node = self.best_split()
-        #print("leaf decision!!!!!", leaf_decision)
         print(f'Best Feature {best_feature}, terminal node {terminal_node}')
         print('current depth: ', self.depth)
 
         if (best_feature is not None) and (best_information_gain != 0): #and (self.depth < self.max_depth): ###########
             self.best_feature = best_feature
             self.best_information_gain = best_information_gain
-            #self.leaf_side = leaf_side
-            #self.leaf_decision = leaf_decision
             print("best feature:", best_feature)
             if not terminal_node:
                 # if leaf is on the right decision branch...
@@ -366,9 +369,7 @@ class Node:
 if __name__ == "__main__":
 
     X, Y = read_features_labels('data_set_TV.txt')
-    n_=Node(X=X, Y=Y, max_depth=3)
-    n_.grow_tree()
-    x = np.array([0,0,1,1])
+    DT = DT_train_binary(X, Y, max_depth=2)
     #print(n_.predict(x))
     #n_.print_tree()
     #print_tree(n_)
