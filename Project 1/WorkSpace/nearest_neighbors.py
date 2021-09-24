@@ -88,11 +88,6 @@ def KNN_test(X_train,Y_train,X_test,Y_test,K) -> float:
         print('row ', row + 1)
         results.append(knn.predict(X_test[row,:]))
     compare = results == Y_test
-    
-    print(results)
-    print(Y_test)
-    print(compare)
-    
     return (sum(compare) / len(compare))
     
 
